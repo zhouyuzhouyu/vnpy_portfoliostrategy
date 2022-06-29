@@ -178,6 +178,7 @@ class StrategyEngine(BaseEngine):
         volume: float,
         lock: bool,
         net: bool,
+        market: bool = False,
     ) -> list:
         """
         Send a new order to server.
@@ -197,7 +198,7 @@ class StrategyEngine(BaseEngine):
             exchange=contract.exchange,
             direction=direction,
             offset=offset,
-            type=OrderType.LIMIT,
+            type=OrderType.MARKET if market else OrderType.LIMIT,
             price=price,
             volume=volume,
             reference=f"{APP_NAME}_{strategy.strategy_name}"
