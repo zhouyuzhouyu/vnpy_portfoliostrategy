@@ -151,32 +151,36 @@ class StrategyTemplate(ABC):
             self.active_orderids.remove(order.vt_orderid)
 
     def buy(self, vt_symbol: str, price: float, volume: float, lock: bool = False, net: bool = False,
-            market: bool = False) -> List[str]:
+            stop: bool = False, market: bool = False, ocaGroup: str = "") -> List[str]:
         """
         Send buy order to open a long position.
         """
-        return self.send_order(vt_symbol, Direction.LONG, Offset.OPEN, price, volume, lock, net, market)
+        return self.send_order(vt_symbol, Direction.LONG, Offset.OPEN, price, volume, lock, net,
+                               stop, market, ocaGroup)
 
     def sell(self, vt_symbol: str, price: float, volume: float, lock: bool = False, net: bool = False,
-             market: bool = False) -> List[str]:
+             stop: bool = False, market: bool = False, ocaGroup: str = "") -> List[str]:
         """
         Send sell order to close a long position.
         """
-        return self.send_order(vt_symbol, Direction.SHORT, Offset.CLOSE, price, volume, lock, net, market)
+        return self.send_order(vt_symbol, Direction.SHORT, Offset.CLOSE, price, volume, lock, net,
+                               stop, market, ocaGroup)
 
     def short(self, vt_symbol: str, price: float, volume: float, lock: bool = False, net: bool = False,
-              market: bool = False) -> List[str]:
+              stop: bool = False, market: bool = False, ocaGroup: str = "") -> List[str]:
         """
         Send short order to open as short position.
         """
-        return self.send_order(vt_symbol, Direction.SHORT, Offset.OPEN, price, volume, lock, net, market)
+        return self.send_order(vt_symbol, Direction.SHORT, Offset.OPEN, price, volume, lock, net,
+                               stop, market, ocaGroup)
 
     def cover(self, vt_symbol: str, price: float, volume: float, lock: bool = False, net: bool = False,
-              market: bool = False) -> List[str]:
+              stop: bool = False, market: bool = False, ocaGroup: str = "") -> List[str]:
         """
         Send cover order to close a short position.
         """
-        return self.send_order(vt_symbol, Direction.LONG, Offset.CLOSE, price, volume, lock, net, market)
+        return self.send_order(vt_symbol, Direction.LONG, Offset.CLOSE, price, volume, lock, net,
+                               stop, market, ocaGroup)
 
     def send_order(
         self,
@@ -187,14 +191,16 @@ class StrategyTemplate(ABC):
         volume: float,
         lock: bool = False,
         net: bool = False,
+        stop: bool = False,
         market: bool = False,
+        ocaGroup: str = "",
     ) -> List[str]:
         """
         Send a new order.
         """
         if self.trading:
             vt_orderids: list = self.strategy_engine.send_order(
-                self, vt_symbol, direction, offset, price, volume, lock, net, market
+                self, vt_symbol, direction, offset, price, volume, lock, net, stop, market, ocaGroup
             )
 
             for vt_orderid in vt_orderids:

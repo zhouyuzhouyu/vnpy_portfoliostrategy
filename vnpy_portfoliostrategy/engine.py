@@ -178,7 +178,9 @@ class StrategyEngine(BaseEngine):
         volume: float,
         lock: bool,
         net: bool,
+        stop: bool = False,
         market: bool = False,
+        ocaGroup: str = "",
     ) -> list:
         """
         Send a new order to server.
@@ -198,11 +200,20 @@ class StrategyEngine(BaseEngine):
             exchange=contract.exchange,
             direction=direction,
             offset=offset,
-            type=OrderType.MARKET if market else OrderType.LIMIT,
+            type=OrderType.LIMIT,
             price=price,
             volume=volume,
+            ocaGroup=ocaGroup,
             reference=f"{APP_NAME}_{strategy.strategy_name}"
         )
+
+        if stop:
+            original_req.type = OrderType.STOP
+        else:
+            if market:
+                original_req.type = OrderType.MARKET
+            else:
+                original_req.type = OrderType.LIMIT
 
         # Convert with offset converter
         req_list: List[OrderRequest] = self.offset_converter.convert_order_request(original_req, lock, net)
