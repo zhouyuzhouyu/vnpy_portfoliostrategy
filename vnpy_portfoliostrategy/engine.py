@@ -41,6 +41,7 @@ from vnpy.trader.utility import load_json, save_json, extract_vt_symbol, round_t
 from vnpy.trader.datafeed import BaseDatafeed, get_datafeed
 from vnpy.trader.converter import OffsetConverter
 from vnpy.trader.database import BaseDatabase, get_database
+from vnpy.trader.translate import tr
 
 from .base import (
     APP_NAME,
@@ -84,7 +85,7 @@ class StrategyEngine(BaseEngine):
         self.load_strategy_setting()
         self.load_strategy_data()
         self.register_event()
-        self.write_log("组合策略引擎初始化成功")
+        self.write_log(tr("Strategy engine initialized successfully", "组合策略引擎初始化成功"))
 
     def close(self) -> None:
         """"""
@@ -103,7 +104,7 @@ class StrategyEngine(BaseEngine):
         """
         result: bool = self.datafeed.init()
         if result:
-            self.write_log("数据服务初始化成功")
+            self.write_log(tr("Datafeed initialization succeeded", "数据服务初始化成功"))
 
     def query_bar_from_datafeed(
         self, symbol: str, exchange: Exchange, interval: Interval, start: datetime, end: datetime
@@ -187,7 +188,7 @@ class StrategyEngine(BaseEngine):
         """
         contract: Optional[ContractData] = self.main_engine.get_contract(vt_symbol)
         if not contract:
-            self.write_log(f"委托失败，找不到合约：{vt_symbol}", strategy)
+            self.write_log(f"{tr('Send fail,could not find contract', '委托失败，找不到合约')}：{vt_symbol}", strategy)
             return ""
 
         # Round order price and volume to nearest incremental value
@@ -242,7 +243,7 @@ class StrategyEngine(BaseEngine):
         """"""
         order: Optional[OrderData] = self.main_engine.get_order(vt_orderid)
         if not order:
-            self.write_log(f"撤单失败，找不到委托{vt_orderid}", strategy)
+            self.write_log(f"{tr('Cancel fail,could not find contract', '撤单失败，找不到委托')}:{vt_orderid}", strategy)
             return
 
         req: CancelRequest = order.create_cancel_request()
@@ -352,7 +353,7 @@ class StrategyEngine(BaseEngine):
             strategy.trading = False
             strategy.inited = False
 
-            msg: str = f"触发异常已停止\n{traceback.format_exc()}"
+            msg: str = f"{tr('Triggering exception has stopped','触发异常已停止')}\n{traceback.format_exc()}"
             self.write_log(msg, strategy)
 
     def add_strategy(
@@ -362,12 +363,12 @@ class StrategyEngine(BaseEngine):
         Add a new strategy.
         """
         if strategy_name in self.strategies:
-            self.write_log(f"创建策略失败，存在重名{strategy_name}")
+            self.write_log(f"{tr('Failed to create strategy, duplicate name exists','创建策略失败，存在重名')}{strategy_name}")
             return
 
         strategy_class: Optional[StrategyTemplate] = self.classes.get(class_name, None)
         if not strategy_class:
-            self.write_log(f"创建策略失败，找不到策略类{class_name}")
+            self.write_log(f"{tr('Failed to create strategy,class not found','创建策略失败，找不到策略类')}{class_name}")
             return
 
         strategy: StrategyTemplate = strategy_class(self, strategy_name, vt_symbols, setting)
@@ -394,10 +395,10 @@ class StrategyEngine(BaseEngine):
         strategy: StrategyTemplate = self.strategies[strategy_name]
 
         if strategy.inited:
-            self.write_log(f"{strategy_name}已经完成初始化，禁止重复操作")
+            self.write_log(f"{strategy_name}{tr('The initialization has been completed, and repeated operations are prohibited','已经完成初始化，禁止重复操作')}")
             return
 
-        self.write_log(f"{strategy_name}开始执行初始化")
+        self.write_log(f"{strategy_name} {tr('Start the initialization','开始执行初始化')}")
 
         # Call on_init function of strategy
         self.call_strategy_func(strategy, strategy.on_init)
@@ -421,12 +422,12 @@ class StrategyEngine(BaseEngine):
                     symbol=contract.symbol, exchange=contract.exchange)
                 self.main_engine.subscribe(req, contract.gateway_name)
             else:
-                self.write_log(f"行情订阅失败，找不到合约{vt_symbol}", strategy)
+                self.write_log(f"{tr('Contract subscription failed, no contract found','行情订阅失败，找不到合约')} {vt_symbol}", strategy)
 
         # Put event to update init completed status.
         strategy.inited = True
         self.put_strategy_event(strategy)
-        self.write_log(f"{strategy_name}初始化完成")
+        self.write_log(f"{strategy_name} {tr('initialize completed','初始化完成')}")
 
     def start_strategy(self, strategy_name: str) -> None:
         """
@@ -434,11 +435,11 @@ class StrategyEngine(BaseEngine):
         """
         strategy: StrategyTemplate = self.strategies[strategy_name]
         if not strategy.inited:
-            self.write_log(f"策略{strategy.strategy_name}启动失败，请先初始化")
+            self.write_log(f"{tr('Strategy','策略')} {strategy.strategy_name} {tr('failed to start, please initialize first','启动失败，请先初始化')}")
             return
 
         if strategy.trading:
-            self.write_log(f"{strategy_name}已经启动，请勿重复操作")
+            self.write_log(f"{strategy_name} {tr('already started, please do not repeat the operation','已经启动，请勿重复操作')}")
             return
 
         self.call_strategy_func(strategy, strategy.on_start)
@@ -485,7 +486,7 @@ class StrategyEngine(BaseEngine):
         """
         strategy: StrategyTemplate = self.strategies[strategy_name]
         if strategy.trading:
-            self.write_log(f"策略{strategy.strategy_name}移除失败，请先停止")
+            self.write_log(f"{tr('Strategy','策略')} {strategy.strategy_name} {tr('removal failed, please stop first','移除失败，请先停止')}")
             return
 
         # Remove from symbol strategy map
@@ -537,7 +538,7 @@ class StrategyEngine(BaseEngine):
                 if (isinstance(value, type) and issubclass(value, StrategyTemplate) and value is not StrategyTemplate):
                     self.classes[value.__name__] = value
         except:  # noqa
-            msg: str = f"策略文件{module_name}加载失败，触发异常：\n{traceback.format_exc()}"
+            msg: str = f"{tr('Strategy file','策略文件')} {module_name} {tr('failed to load, trigger exception','加载失败，触发异常')}：\n{traceback.format_exc()}"
             self.write_log(msg)
 
     def load_strategy_data(self) -> None:
@@ -652,6 +653,6 @@ class StrategyEngine(BaseEngine):
         if strategy:
             subject: str = f"{strategy.strategy_name}"
         else:
-            subject: str = "组合策略引擎"
+            subject: str = tr("Trading Portfolio Strategy", "组合策略引擎")
 
         self.main_engine.send_email(subject, msg)

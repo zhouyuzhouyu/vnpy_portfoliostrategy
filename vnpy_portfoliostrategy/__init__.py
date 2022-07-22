@@ -32,6 +32,7 @@ from .base import APP_NAME
 from .engine import StrategyEngine
 from .template import StrategyTemplate
 from .backtesting import BacktestingEngine
+from vnpy.trader.translate import tr
 
 
 class PortfolioStrategyApp(BaseApp):
@@ -40,7 +41,7 @@ class PortfolioStrategyApp(BaseApp):
     app_name: str = APP_NAME
     app_module: str = __module__
     app_path: Path = Path(__file__).parent
-    display_name: str = "组合策略"
+    display_name: str = tr("Trading Portfolio Strategy", "组合策略")
     engine_class: StrategyEngine = StrategyEngine
     widget_name: str = "PortfolioStrategyManager"
     icon_name: str = str(app_path.joinpath("ui", "strategy.ico"))

@@ -14,6 +14,7 @@ from ..base import (
     EVENT_PORTFOLIO_STRATEGY
 )
 from ..engine import StrategyEngine
+from vnpy.trader.translate import tr
 
 
 class PortfolioStrategyManager(QtWidgets.QWidget):
@@ -39,24 +40,24 @@ class PortfolioStrategyManager(QtWidgets.QWidget):
 
     def init_ui(self) -> None:
         """"""
-        self.setWindowTitle("组合策略")
+        self.setWindowTitle(tr("Trading Portfolio Strategy", "组合策略"))
 
         # Create widgets
         self.class_combo: QtWidgets.QComboBox = QtWidgets.QComboBox()
 
-        add_button: QtWidgets.QPushButton = QtWidgets.QPushButton("添加策略")
+        add_button: QtWidgets.QPushButton = QtWidgets.QPushButton(tr("Add Strategy", "添加策略"))
         add_button.clicked.connect(self.add_strategy)
 
-        init_button: QtWidgets.QPushButton = QtWidgets.QPushButton("全部初始化")
+        init_button: QtWidgets.QPushButton = QtWidgets.QPushButton(tr("All Initialize", "全部初始化"))
         init_button.clicked.connect(self.strategy_engine.init_all_strategies)
 
-        start_button: QtWidgets.QPushButton = QtWidgets.QPushButton("全部启动")
+        start_button: QtWidgets.QPushButton = QtWidgets.QPushButton(tr("All Start", "全部启动"))
         start_button.clicked.connect(self.strategy_engine.start_all_strategies)
 
-        stop_button: QtWidgets.QPushButton = QtWidgets.QPushButton("全部停止")
+        stop_button: QtWidgets.QPushButton = QtWidgets.QPushButton(tr("All Stop", "全部停止"))
         stop_button.clicked.connect(self.strategy_engine.stop_all_strategies)
 
-        clear_button: QtWidgets.QPushButton = QtWidgets.QPushButton("清空日志")
+        clear_button: QtWidgets.QPushButton = QtWidgets.QPushButton(tr("Clear Log", "清空日志"))
         clear_button.clicked.connect(self.clear_log)
 
         self.scroll_layout: QtWidgets.QVBoxLayout = QtWidgets.QVBoxLayout()
@@ -181,21 +182,21 @@ class StrategyManager(QtWidgets.QFrame):
         self.setFrameShape(self.Box)
         self.setLineWidth(1)
 
-        self.init_button: QtWidgets.QPushButton = QtWidgets.QPushButton("初始化")
+        self.init_button: QtWidgets.QPushButton = QtWidgets.QPushButton(tr("Initialize", "初始化"))
         self.init_button.clicked.connect(self.init_strategy)
 
-        self.start_button: QtWidgets.QPushButton = QtWidgets.QPushButton("启动")
+        self.start_button: QtWidgets.QPushButton = QtWidgets.QPushButton(tr("Start", "启动"))
         self.start_button.clicked.connect(self.start_strategy)
         self.start_button.setEnabled(False)
 
-        self.stop_button: QtWidgets.QPushButton = QtWidgets.QPushButton("停止")
+        self.stop_button: QtWidgets.QPushButton = QtWidgets.QPushButton(tr("Stop", "停止"))
         self.stop_button.clicked.connect(self.stop_strategy)
         self.stop_button.setEnabled(False)
 
-        self.edit_button: QtWidgets.QPushButton = QtWidgets.QPushButton("编辑")
+        self.edit_button: QtWidgets.QPushButton = QtWidgets.QPushButton(tr("Edit", "编辑"))
         self.edit_button.clicked.connect(self.edit_strategy)
 
-        self.remove_button: QtWidgets.QPushButton = QtWidgets.QPushButton("移除")
+        self.remove_button: QtWidgets.QPushButton = QtWidgets.QPushButton(tr("Remove", "移除"))
         self.remove_button.clicked.connect(self.remove_strategy)
 
         strategy_name: str = self._data["strategy_name"]
@@ -338,8 +339,8 @@ class LogMonitor(BaseMonitor):
     sorting: bool = False
 
     headers: dict = {
-        "time": {"display": "时间", "cell": TimeCell, "update": False},
-        "msg": {"display": "信息", "cell": MsgCell, "update": False},
+        "time": {"display": tr("Time", "时间"), "cell": TimeCell, "update": False},
+        "msg": {"display": tr("Detail", "信息"), "cell": MsgCell, "update": False},
     }
 
     def init_ui(self) -> None:
@@ -385,13 +386,13 @@ class SettingEditor(QtWidgets.QDialog):
 
         # Add vt_symbols and name edit if add new strategy
         if self.class_name:
-            self.setWindowTitle(f"添加策略：{self.class_name}")
-            button_text: str = "添加"
+            self.setWindowTitle(f"{tr('Add Strategy', '添加策略')}：{self.class_name}")
+            button_text: str = tr("Add", "添加")
             parameters: dict = {"strategy_name": "", "vt_symbols": ""}
             parameters.update(self.parameters)
         else:
-            self.setWindowTitle(f"参数编辑：{self.strategy_name}")
-            button_text: str = "确定"
+            self.setWindowTitle(f"{tr('Parameter Editing', '参数编辑')}：{self.strategy_name}")
+            button_text: str = tr("Confirm", "确定")
             parameters: dict = self.parameters
 
         for name, value in parameters.items():
