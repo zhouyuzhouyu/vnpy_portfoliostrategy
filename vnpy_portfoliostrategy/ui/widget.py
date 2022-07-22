@@ -204,7 +204,8 @@ class StrategyManager(QtWidgets.QFrame):
         author: str = self._data["author"]
 
         label_text: str = (
-            f"{strategy_name}  -  ({class_name} by {author})"
+            # f"{strategy_name}  -  ({class_name} by {author})"
+            f"{strategy_name}  -  ({class_name})"
         )
         label: QtWidgets.QLabel = QtWidgets.QLabel(label_text)
         label.setAlignment(QtCore.Qt.AlignCenter)
